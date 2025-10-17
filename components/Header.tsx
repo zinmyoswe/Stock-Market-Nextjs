@@ -9,7 +9,7 @@ const Header = () => {
         <header className="sticty top-0 header">
             <div className="container header-wrapper">
                 <Link href="/">
-                    <Image src="/assets/icons/logo4.png"
+                    <Image src="/assets/icons/logo6.png"
                            alt="Stock Market Peach"
                            width={140}
                            height={42}
