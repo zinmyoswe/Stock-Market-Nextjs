@@ -13,7 +13,7 @@ const Header = () => {
                            alt="Stock Market Peach"
                            width={140}
                            height={42}
-                           className="h-12 w-auto cursor-pointer"
+                           className="h-10 w-auto cursor-pointer"
                     />
                 </Link>
 
