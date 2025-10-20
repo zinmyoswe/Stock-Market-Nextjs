@@ -1,5 +1,6 @@
 import { inngest } from "./client";
 import {PERSONALIZED_WELCOME_EMAIL_PROMPT} from "@/lib/inngest/prompts";
+import {sendWelcomeEmail} from "@/lib/nodemailer";
 
 export const sendSignUpEmail = inngest.createFunction(
     { id: "sign-up-email" },
@@ -32,8 +33,9 @@ export const sendSignUpEmail = inngest.createFunction(
             const introText = (part && 'text' in part ? part.text : null) || 'Thank for joining Stockmarketpeach. You now have the tools to track markets and make smater moves.'
 
             const {data:{email,name}} = event;
-            
-            // For nodemailer function
+
+            // For NodeMailer
+            return await sendWelcomeEmail({email,name, intro:introText});
         })
 
         return{
