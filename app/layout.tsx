@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-    title: "StockMarketZin",
+    title: "StockMarketPeach",
     description: "Developed by Zin",
 };
 
