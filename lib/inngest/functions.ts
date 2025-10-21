@@ -44,3 +44,14 @@ export const sendSignUpEmail = inngest.createFunction(
         };
     },
 );
+
+export const sendDailyNewsSummary = inngest.createFunction(
+    { id: "daily-news-summary" },
+    [{ event: "app/daily.news.summary" }, { cron: "0 12 * * *" }],
+    async ({ step }) => {
+        // step #1: Geat all users for news delivery
+        // step #2: Fetch personalized news for each user
+        // step #3: Summarize news via AI for each user
+        // step #4: Send emails
+    }
+)
