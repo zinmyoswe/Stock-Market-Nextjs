@@ -1,9 +1,10 @@
 import { inngest } from "./client";
-import {PERSONALIZED_WELCOME_EMAIL_PROMPT} from "@/lib/inngest/prompts";
-import {sendWelcomeEmail} from "@/lib/nodemailer";
+import {NEWS_SUMMARY_EMAIL_PROMPT, PERSONALIZED_WELCOME_EMAIL_PROMPT} from "@/lib/inngest/prompts";
+import {sendNewsSummaryEmail, sendWelcomeEmail} from "@/lib/nodemailer";
 import { getAllUsersForNewsEmail } from "../actions/user.actions";
 import { getWatchlistSymbolsByEmail } from "@/lib/actions/watchlist.actions";
 import { getNews } from "@/lib/actions/finnhub.actions";
+import { formatDateToday } from "../utils";
 
 export const sendSignUpEmail = inngest.createFunction(
     { id: "sign-up-email" },
@@ -81,11 +82,40 @@ export const sendDailyNewsSummary = inngest.createFunction(
         });
 
                 // step #3: Summarize news via AI (placeholder)
-                
+                const userNewsSummaries: { user: User; newsContent: string | null}[] = [];
+
+        for (const { user, articles } of results) {
+                try {
+                    const prompt = NEWS_SUMMARY_EMAIL_PROMPT.replace('{{newsData}}', JSON.stringify(articles, null, 2));
+
+                    const response = await step.ai.infer(`summarize-news-${user.email}`, {
+                        model: step.ai.models.gemini({ model: 'gemini-2.5-flash-lite' }),
+                        body: {
+                            contents: [{ role: 'user', parts: [{ text:prompt }]}]
+                        }
+                    });
+
+                    const part = response.candidates?.[0]?.content?.parts?.[0];
+                    const newsContent = (part && 'text' in part ? part.text : null) || 'No market news.'
+
+                    userNewsSummaries.push({ user, newsContent });
+                } catch (e) {
+                    console.error('Failed to summarize news for : ', user.email);
+                    userNewsSummaries.push({ user, newsContent: null });
+                }
+            }
 
                 // step #4: Send email (placeholder)
-                
+                await step.run('send-news-emails', async () => {
+                await Promise.all(
+                    userNewsSummaries.map(async ({ user, newsContent}) => {
+                        if(!newsContent) return false;
 
-        return { success: true };
+                        return await sendNewsSummaryEmail({ email: user.email, date: formatDateToday, newsContent })
+                    })
+                )
+            })
+
+        return { success: true, message: 'Daily news summary emails sent successfully' }
     }
 )
